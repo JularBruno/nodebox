@@ -87,42 +87,57 @@ export default function Game() {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
     // setHistory([...history, nextSquares]);
     setHistory(nextHistory);
+    console.log('setHistory ', nextHistory);
     setCurrentMove(nextHistory.length - 1);
+    console.log('setCurrentMove ', nextHistory.length - 1);
     // setXIsNext(!xIsNext);
   }
 
   function jumpTo(nextMove) {
+    console.log('nextMove ', nextMove);
     setCurrentMove(nextMove);
+
+    setHistory(history.slice(0, nextMove + 1)); // added ability to restart from step selected
     // setXIsNext(nextMove % 2 === 0);
   }
 
-  const moves = history.map((squares, move) => {
-    let description;
-    if (move > 0) {
-      description = 'Go to move #' + move;
+  const moves = () => {
+    if (calculateWinner(currentSquares)) {
+      return (
+          <li key={0}>
+            <button onClick={() => jumpTo(0)}>{'Restart game!'}</button>
+          </li>
+        );
     } else {
-      description = 'Go to game start';
+      return history.map((squares, move) => {
+        let description;
+        if (move > 0) {
+          description = 'Go to move #' + move;
+        } else {
+          description = 'Go to game start';
+        }
+        // key is a special and reserved property in React.  React automatically uses key to decide which components to update.
+        return (
+          <li key={move}>
+            <button onClick={() => jumpTo(move)}>{description}</button>
+          </li>
+        )
+      })
     }
-    // key is a special and reserved property in React.  React automatically uses key to decide which components to update.
-    return (
-      <li key={move}>
-        <button onClick={() => jumpTo(move)}>{description}</button>
-      </li>
-    )
-  });
+  };
 
-   return (
-      <div className="game">
-        <div className="game-board">
-          <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
-        </div>
-        <div className="game-info">
-          <ol>
-            {moves}
-          </ol>
-        </div>
+  return (
+    <div className="game">
+      <div className="game-board">
+        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
-   );
+      <div className="game-info">
+        <ol>
+          {moves()}
+        </ol>
+      </div>
+    </div>
+  );
 }
 
 // helper function
@@ -146,3 +161,8 @@ function calculateWinner(squares) {
   }
   return null;
 }
+
+// TODOS 
+// (i though of more but I dont remember them)
+//- "go to move" should reset list
+//- restart game button when winner
